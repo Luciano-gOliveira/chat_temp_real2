@@ -3,14 +3,14 @@ import io from 'socket.io-client'
 
 
 
-export default function join({setchatVisibility, setSocket}) {
+export default function join({setchatVisibility, setSocket, user}) {
 
     const usernameRef = useRef()
     const handlesSubmit = async () => {
         const username = usernameRef.current.value
         if(!username.trim()) return
         const socket = io('https://chat-temp-real2.onrender.com')
-        socket.emit('set_username', username)
+        socket.emit('set_username', user.displayName || username)
         setSocket(socket)
         setchatVisibility(true)
     }

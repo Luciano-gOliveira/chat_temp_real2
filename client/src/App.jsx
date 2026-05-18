@@ -1,19 +1,24 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import './App.css'
 import Join from './components/Join/join'
 import Chat from './components/Chat/chat'
+import Auth from './components/Auth/auth'
 
 function App() {
   const [chatVisibility, setchatVisibility] = useState(false)
-  const[socket, setSocket] = useState(null)
+  const [socket, setSocket] = useState(null)
+  const [user, setUser] = useState(null)
 
   return (
     <>
       <div className='app'>
-        {chatVisibility ? <Chat socket={socket} /> : <Join setSocket={setSocket} setchatVisibility={setchatVisibility} />}
+        {!user ? (
+          <Auth setUser={setUser} />
+        ) : chatVisibility ? (
+          <Chat socket={socket} user={user} />
+        ) : (
+          <Join setSocket={setSocket} setchatVisibility={setchatVisibility} user={user} />
+        )}
       </div>
     </>
   )
