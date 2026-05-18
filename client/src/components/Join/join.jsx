@@ -9,7 +9,7 @@ export default function join({setchatVisibility, setSocket}) {
     const handlesSubmit = async () => {
         const username = usernameRef.current.value
         if(!username.trim()) return
-        const socket = await io('http://localhost:3001')
+        const socket = io('https://chat-temp-real2.onrender.com')
         socket.emit('set_username', username)
         setSocket(socket)
         setchatVisibility(true)
