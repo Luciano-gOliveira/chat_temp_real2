@@ -29,7 +29,7 @@ export default function chat({socket}) {
         {mensageList.map((message, index) => (
             <p key={index}> {message.authorUsername}: {message.text}</p>
         ))}
-        <input type="text" name="" id="" ref={messageRef}  placeholder='Mensagem'/>
+        <input type="text" name="" id="" ref={messageRef}  placeholder='Mensagem' onKeyDown={(e) => e.key === 'Enter' && handlesSubmit()}/>
         <button onClick={() => handlesSubmit() }>Enviar</button>
     </div>
   )
