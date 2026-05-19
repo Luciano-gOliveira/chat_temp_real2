@@ -11,7 +11,6 @@ export default function Chat({ socket, user }) {
     const [unread, setUnread] = useState(0)
     const [showScrollBtn, setShowScrollBtn] = useState(false)
 
-    // Carrega mensagens do Firestore
     useEffect(() => {
         const q = query(collection(db, 'messages'), orderBy('createdAt'))
         const unsub = onSnapshot(q, (snapshot) => {
@@ -21,26 +20,22 @@ export default function Chat({ socket, user }) {
         return () => unsub()
     }, [])
 
-    // Seta username no socket
     useEffect(() => {
         socket.emit('set_username', user?.displayName)
     }, [user])
 
-    // Pede permissão de notificação
     useEffect(() => {
         if (Notification.permission === 'default') {
             Notification.requestPermission()
         }
     }, [])
 
-    // Rola para o final quando chega mensagem nova
     useEffect(() => {
         if (!showScrollBtn) {
             bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
         }
     }, [mensageList])
 
-    // Notificação + badge quando chega mensagem
     useEffect(() => {
         if (mensageList.length === 0) return
         const last = mensageList[mensageList.length - 1]
@@ -61,7 +56,6 @@ export default function Chat({ socket, user }) {
         }
     }, [mensageList])
 
-    // Limpa badge quando voltar para a aba
     useEffect(() => {
         const handleFocus = () => {
             setUnread(0)
@@ -71,7 +65,6 @@ export default function Chat({ socket, user }) {
         return () => window.removeEventListener('focus', handleFocus)
     }, [])
 
-    // Detecta se o usuário rolou para cima
     const handleScroll = (e) => {
         const { scrollTop, scrollHeight, clientHeight } = e.target
         const isAtBottom = scrollHeight - scrollTop - clientHeight < 50
@@ -133,7 +126,7 @@ export default function Chat({ socket, user }) {
             flexDirection: 'column',
             alignItems: 'center',
             width: '100%',
-            maxWidth: '600px',
+            maxWidth: '800px',
             margin: '0 auto',
             padding: '16px',
             height: '100vh',
@@ -141,7 +134,6 @@ export default function Chat({ socket, user }) {
         }}>
             <h1>Chat Real</h1>
 
-            {/* Lista de mensagens com scroll */}
             <div
                 onScroll={handleScroll}
                 style={{
@@ -190,7 +182,7 @@ export default function Chat({ socket, user }) {
                                     src={message.imageUrl}
                                     alt="imagem"
                                     style={{
-                                        maxWidth: '300px',
+                                        maxWidth: '400px',
                                         width: '100%',
                                         borderRadius: '12px',
                                         marginTop: '4px'
@@ -203,7 +195,6 @@ export default function Chat({ socket, user }) {
                 <div ref={bottomRef} />
             </div>
 
-            {/* Botão de rolar para baixo */}
             {showScrollBtn && (
                 <button
                     onClick={scrollToBottom}
@@ -225,7 +216,6 @@ export default function Chat({ socket, user }) {
                 </button>
             )}
 
-            {/* Input */}
             <div style={{
                 display: 'flex',
                 gap: '8px',
