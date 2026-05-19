@@ -5,9 +5,11 @@ import { collection, addDoc, onSnapshot, orderBy, query, serverTimestamp } from 
 export default function Chat({ socket, user }) {
     const messageRef = useRef()
     const fileRef = useRef()
+    const bottomRef = useRef()
     const [mensageList, setMensageList] = useState([])
     const [uploading, setUploading] = useState(false)
     const [unread, setUnread] = useState(0)
+    const [showScrollBtn, setShowScrollBtn] = useState(false)
 
     // Carrega mensagens do Firestore
     useEffect(() => {
@@ -30,6 +32,13 @@ export default function Chat({ socket, user }) {
             Notification.requestPermission()
         }
     }, [])
+
+    // Rola para o final quando chega mensagem nova
+    useEffect(() => {
+        if (!showScrollBtn) {
+            bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }
+    }, [mensageList])
 
     // Notificação + badge quando chega mensagem
     useEffect(() => {
@@ -61,6 +70,18 @@ export default function Chat({ socket, user }) {
         window.addEventListener('focus', handleFocus)
         return () => window.removeEventListener('focus', handleFocus)
     }, [])
+
+    // Detecta se o usuário rolou para cima
+    const handleScroll = (e) => {
+        const { scrollTop, scrollHeight, clientHeight } = e.target
+        const isAtBottom = scrollHeight - scrollTop - clientHeight < 50
+        setShowScrollBtn(!isAtBottom)
+    }
+
+    const scrollToBottom = () => {
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+        setShowScrollBtn(false)
+    }
 
     const handlesSubmit = async () => {
         const message = messageRef.current.value
@@ -114,17 +135,25 @@ export default function Chat({ socket, user }) {
             width: '100%',
             maxWidth: '600px',
             margin: '0 auto',
-            padding: '16px'
+            padding: '16px',
+            height: '100vh',
+            boxSizing: 'border-box'
         }}>
             <h1>Chat Real</h1>
 
-            <div style={{
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-                marginBottom: '16px'
-            }}>
+            {/* Lista de mensagens com scroll */}
+            <div
+                onScroll={handleScroll}
+                style={{
+                    width: '100%',
+                    flex: 1,
+                    overflowY: 'auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                    marginBottom: '8px'
+                }}
+            >
                 {mensageList.map((message, index) => {
                     const text = typeof message.text === 'object'
                         ? message.text?.text ?? ''
@@ -171,8 +200,32 @@ export default function Chat({ socket, user }) {
                         </div>
                     )
                 })}
+                <div ref={bottomRef} />
             </div>
 
+            {/* Botão de rolar para baixo */}
+            {showScrollBtn && (
+                <button
+                    onClick={scrollToBottom}
+                    style={{
+                        position: 'fixed',
+                        bottom: '80px',
+                        right: '20px',
+                        borderRadius: '50%',
+                        width: '40px',
+                        height: '40px',
+                        fontSize: '20px',
+                        cursor: 'pointer',
+                        background: '#25D366',
+                        color: '#fff',
+                        border: 'none'
+                    }}
+                >
+                    ↓
+                </button>
+            )}
+
+            {/* Input */}
             <div style={{
                 display: 'flex',
                 gap: '8px',
