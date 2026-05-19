@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { auth } from '../../firebase'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 
 export default function Auth({ setUser }) {
     const [isLogin, setIsLogin] = useState(true)
@@ -22,6 +22,17 @@ export default function Auth({ setUser }) {
             }
         } catch (err) {
             setError('Email ou senha inválidos!')
+        }
+    }
+
+    const handleGoogle = async () => {
+        setError('')
+        try {
+            const provider = new GoogleAuthProvider()
+            const result = await signInWithPopup(auth, provider)
+            setUser(result.user)
+        } catch (err) {
+            setError('Erro ao entrar com Google!')
         }
     }
 
@@ -51,6 +62,9 @@ export default function Auth({ setUser }) {
             {error && <p>{error}</p>}
             <button onClick={handleSubmit}>
                 {isLogin ? 'Entrar' : 'Cadastrar'}
+            </button>
+            <button onClick={handleGoogle}>
+                Entrar com Google
             </button>
             <p onClick={() => setIsLogin(!isLogin)} style={{cursor:'pointer'}}>
                 {isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça login'}
