@@ -1,14 +1,28 @@
 import React, {useRef, useState, useEffect} from 'react'
+import { db } from '../../firebase'
+import { collection, addDoc, onSnapshot, orderBy, query } from 'firebase/firestore'
 
-export default function chat({socket}) {
+export default function chat({socket, user}) {
     const messageRef = useRef()
     const [mensageList, setMensageList] = useState([])
 
-    console.log('socket:', socket)
-
+    // Carrega mensagens do Firestore em tempo real
     useEffect(() => {
-        socket.on('receive_message', data => {
-            setMensageList(current => [...current, data])
+        const q = query(collection(db, 'messages'), orderBy('createdAt'))
+        const unsub = onSnapshot(q, (snapshot) => {
+            const msgs = snapshot.docs.map(doc => doc.data())
+            setMensageList(msgs)
+        })
+        return () => unsub()
+    }, [])
+
+    // Recebe mensagens do socket
+    useEffect(() => {
+        socket.on('receive_message', async (data) => {
+            await addDoc(collection(db, 'messages'), {
+                ...data,
+                createdAt: new Date()
+            })
         })
         return () => socket.off('receive_message')
     }, [socket])
@@ -30,7 +44,12 @@ export default function chat({socket}) {
             {mensageList.map((message, index) => (
                 <p key={index}>{message.authorUsername}: {message.text}</p>
             ))}
-            <input type="text" ref={messageRef} placeholder='Mensagem' onKeyDown={(e) => e.key === 'Enter' && handlesSubmit()}/>
+            <input 
+                type="text" 
+                ref={messageRef} 
+                placeholder='Mensagem' 
+                onKeyDown={(e) => e.key === 'Enter' && handlesSubmit()}
+            />
             <button onClick={() => handlesSubmit()}>Enviar</button>
         </div>
     )
