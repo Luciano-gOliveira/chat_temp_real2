@@ -16,14 +16,17 @@ export default function Chat({ socket, user }) {
     }, [])
 
     useEffect(() => {
-        socket.on('receive_message', async (data) => {
+    socket.on('receive_message', async (data) => {
+        // ✅ Só salva no Firestore se NÃO for o autor
+        if (data.authorId !== socket.id) {
             await addDoc(collection(db, 'messages'), {
                 ...data,
                 createdAt: new Date()
             })
-        })
-        return () => socket.off('receive_message')
-    }, [socket])
+        }
+    })
+    return () => socket.off('receive_message')
+}, [socket])
 
     const handlesSubmit = () => {
         const message = messageRef.current.value
