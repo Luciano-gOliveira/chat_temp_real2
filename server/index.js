@@ -2,37 +2,40 @@ const app = require('express')()
 const server = require('http').createServer(app)
 
 const io = require('socket.io')(server, {
-    cors: {
-        origin: ['https://chat-temp-real2.vercel.app', 'http://localhost:5173'],
-        methods: ["GET", "POST"]
-    }
+  cors: {
+    origin: [
+      'https://chat-temp-real2.vercel.app',
+      'http://localhost:5173'
+    ],
+    methods: ["GET", "POST"]
+  }
 })
 
 const PORT = process.env.PORT || 3001
 
-io.on('connection',(socket)=>{
+io.on('connection', (socket) => {
 
-    console.log('Novo cliente: '+socket.id)
+  console.log('Novo cliente: ' + socket.id)
 
-    socket.on('set_username', username=>{
-        socket.data.username = username
+  socket.on('set_username', (username) => {
+    socket.data.username = username
+  })
+
+  // ✅ CORREÇÃO PRINCIPAL
+  socket.on('send_message', (data) => {
+    io.emit('receive_message', {
+      ...data,
+      authorId: socket.id,
+      authorUsername: socket.data.username
     })
+  })
 
-    socket.on('send_message', message=>{
-
-        io.emit('receive_message',{
-            text: message,
-            authorId: socket.id,
-            authorUsername: socket.data.username
-        })
-
-    })
-
-    socket.on('disconnect',()=>{
-        console.log('Cliente desconectado: '+socket.id)
-    })
+  socket.on('disconnect', () => {
+    console.log('Cliente desconectado: ' + socket.id)
+  })
+ 
 })
 
-server.listen(PORT,()=>{
-    console.log('Rodando...')
+server.listen(PORT, () => {
+  console.log('Rodando...')
 })
