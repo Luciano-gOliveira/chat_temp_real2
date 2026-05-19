@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { db } from '../../firebase'
-import { collection, addDoc, onSnapshot, orderBy, query } from 'firebase/firestore'
+import { collection, addDoc, onSnapshot, orderBy, query, serverTimestamp } from 'firebase/firestore'
 
 export default function Chat({ socket, user }) {
     const messageRef = useRef()
@@ -9,29 +9,25 @@ export default function Chat({ socket, user }) {
     useEffect(() => {
         const q = query(collection(db, 'messages'), orderBy('createdAt'))
         const unsub = onSnapshot(q, (snapshot) => {
-            const msgs = snapshot.docs.map(doc => doc.data())
+            const msgs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
             setMensageList(msgs)
         })
         return () => unsub()
     }, [])
 
     useEffect(() => {
-    socket.on('receive_message', async (data) => {
-        // ✅ Só salva no Firestore se NÃO for o autor
-        if (data.authorId !== socket.id) {
-            await addDoc(collection(db, 'messages'), {
-                ...data,
-                createdAt: new Date()
-            })
-        }
-    })
-    return () => socket.off('receive_message')
-}, [socket])
+        socket.emit('set_username', user?.displayName)
+    }, [user])
 
-    const handlesSubmit = () => {
+    const handlesSubmit = async () => {
         const message = messageRef.current.value
         if (!message.trim()) return
-        socket.emit('send_message', { text: message })
+        await addDoc(collection(db, 'messages'), {
+            text: message,
+            authorUsername: user?.displayName ?? 'Anônimo',
+            authorId: socket.id,
+            createdAt: serverTimestamp()
+        })
         clearInput()
     }
 
@@ -43,7 +39,6 @@ export default function Chat({ socket, user }) {
         <div>
             <h1>Chat</h1>
             {mensageList.map((message, index) => {
-                // ✅ Garante que text e authorUsername sejam sempre strings
                 const text = typeof message.text === 'object'
                     ? message.text?.text ?? 'Mensagem inválida'
                     : message.text ?? ''
@@ -54,11 +49,9 @@ export default function Chat({ socket, user }) {
 
                 return (
                     <p
-                        key={index}
+                        key={message.id ?? index}
                         style={{
-                            color: username === user?.displayName
-                                ? 'blue'
-                                : 'green'
+                            color: username === user?.displayName ? 'blue' : 'green'
                         }}
                     >
                         <strong>{username}:</strong> {text}
