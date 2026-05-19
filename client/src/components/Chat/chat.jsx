@@ -55,7 +55,7 @@ export default function Chat({ socket, user }) {
                         style={{
                             color: username === user?.displayName
                                 ? 'blue'
-                                : 'black'
+                                : 'green'
                         }}
                     >
                         <strong>{username}:</strong> {text}
