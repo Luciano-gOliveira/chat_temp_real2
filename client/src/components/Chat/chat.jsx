@@ -7,7 +7,9 @@ export default function Chat({ socket, user }) {
     const fileRef = useRef()
     const [mensageList, setMensageList] = useState([])
     const [uploading, setUploading] = useState(false)
+    const [unread, setUnread] = useState(0)
 
+    // Carrega mensagens do Firestore
     useEffect(() => {
         const q = query(collection(db, 'messages'), orderBy('createdAt'))
         const unsub = onSnapshot(q, (snapshot) => {
@@ -17,9 +19,48 @@ export default function Chat({ socket, user }) {
         return () => unsub()
     }, [])
 
+    // Seta username no socket
     useEffect(() => {
         socket.emit('set_username', user?.displayName)
     }, [user])
+
+    // Pede permissão de notificação
+    useEffect(() => {
+        if (Notification.permission === 'default') {
+            Notification.requestPermission()
+        }
+    }, [])
+
+    // Notificação + badge quando chega mensagem
+    useEffect(() => {
+        if (mensageList.length === 0) return
+        const last = mensageList[mensageList.length - 1]
+        if (last.authorId === socket.id) return
+
+        if (document.hidden && Notification.permission === 'granted') {
+            new Notification(`${last.authorUsername}`, {
+                body: last.imageUrl ? '📷 Enviou uma imagem' : last.text,
+                icon: '/vite.svg'
+            })
+        }
+
+        if (document.hidden) {
+            setUnread(prev => {
+                document.title = `(${prev + 1}) Chat Real`
+                return prev + 1
+            })
+        }
+    }, [mensageList])
+
+    // Limpa badge quando voltar para a aba
+    useEffect(() => {
+        const handleFocus = () => {
+            setUnread(0)
+            document.title = 'Chat Real'
+        }
+        window.addEventListener('focus', handleFocus)
+        return () => window.removeEventListener('focus', handleFocus)
+    }, [])
 
     const handlesSubmit = async () => {
         const message = messageRef.current.value
@@ -75,7 +116,7 @@ export default function Chat({ socket, user }) {
             margin: '0 auto',
             padding: '16px'
         }}>
-            <h1>Chat</h1>
+            <h1>Chat Real</h1>
 
             <div style={{
                 width: '100%',
