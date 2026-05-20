@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { db } from '../../firebase'
 import { collection, addDoc, onSnapshot, orderBy, query, serverTimestamp } from 'firebase/firestore'
+import Delete from './Delete'
 
 export default function Chat({ socket, user }) {
     const messageRef = useRef()
@@ -146,52 +147,14 @@ export default function Chat({ socket, user }) {
                     marginBottom: '8px'
                 }}
             >
-                {mensageList.map((message, index) => {
-                    const text = typeof message.text === 'object'
-                        ? message.text?.text ?? ''
-                        : message.text ?? ''
-
-                    const username = typeof message.authorUsername === 'object'
-                        ? message.authorUsername?.displayName ?? 'Anônimo'
-                        : message.authorUsername ?? 'Anônimo'
-
-                    const isMe = username === user?.displayName
-
-                    return (
-                        <div key={message.id ?? index} style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: isMe ? 'flex-end' : 'flex-start'
-                        }}>
-                            <strong style={{ color: isMe ? 'blue' : 'green', fontSize: '12px' }}>
-                                {username}
-                            </strong>
-                            {text && (
-                                <div style={{
-                                    background: isMe ? '#dcf8c6' : '#f1f1f1',
-                                    color: '#000',
-                                    padding: '8px 12px',
-                                    borderRadius: '12px',
-                                    maxWidth: '80%'
-                                }}>
-                                    {text}
-                                </div>
-                            )}
-                            {message.imageUrl && (
-                                <img
-                                    src={message.imageUrl}
-                                    alt="imagem"
-                                    style={{
-                                        maxWidth: '400px',
-                                        width: '100%',
-                                        borderRadius: '12px',
-                                        marginTop: '4px'
-                                    }}
-                                />
-                            )}
-                        </div>
-                    )
-                })}
+                {/* MAP — renderiza cada mensagem usando o componente Delete */}
+                {mensageList.map((message, index) => (
+                    <Delete
+                        key={message.id ?? index}
+                        message={message}
+                        currentUser={user}
+                    />
+                ))}
                 <div ref={bottomRef} />
             </div>
 
