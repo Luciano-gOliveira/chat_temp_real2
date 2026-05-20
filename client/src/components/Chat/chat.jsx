@@ -136,7 +136,7 @@ export default function Chat({ socket, user }) {
             height: '100vh',
             boxSizing: 'border-box'
         }}>
-            <h1>Chat Real</h1>
+            <h1>WhatsApp 2</h1>
 
             <div
                 onScroll={handleScroll}
