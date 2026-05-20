@@ -26,6 +26,8 @@ export default function Delete({ message, currentUser }) {
             <strong style={{ color: isMe ? 'blue' : 'green', fontSize: '12px' }}>
                 {username}
             </strong>
+
+            {/* Mensagem de texto */}
             {text && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <div style={{
@@ -42,6 +44,8 @@ export default function Delete({ message, currentUser }) {
                     </span>
                 </div>
             )}
+
+            {/* Imagem ou figurinha */}
             {message.imageUrl && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <img
@@ -54,6 +58,16 @@ export default function Delete({ message, currentUser }) {
                             marginTop: '4px'
                         }}
                     />
+                    <span onClick={handleDelete} style={{ cursor: 'pointer', fontSize: '12px' }}>
+                        🗑️
+                    </span>
+                </div>
+            )}
+
+            {/* Áudio */}
+            {message.audioUrl && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <audio controls src={message.audioUrl} style={{ marginTop: '4px' }} />
                     <span onClick={handleDelete} style={{ cursor: 'pointer', fontSize: '12px' }}>
                         🗑️
                     </span>

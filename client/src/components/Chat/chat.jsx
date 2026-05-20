@@ -3,6 +3,7 @@ import { db } from '../../firebase'
 import { collection, addDoc, onSnapshot, orderBy, query, serverTimestamp } from 'firebase/firestore'
 import Delete from './Delete'
 import Stickers from './Stickers'
+import VoiceMessage from './VoiceMessage'
 
 export default function Chat({ socket, user }) {
     const messageRef = useRef()
@@ -219,6 +220,8 @@ export default function Chat({ socket, user }) {
                 <button onClick={() => setShowStickers(!showStickers)}>
                     🎭
                 </button>
+                {/* Botão de mensagem de voz */}
+                <VoiceMessage user={user} socket={socket} />
             </div>
         </div>
     )
