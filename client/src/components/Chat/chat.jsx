@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react'
 import { db } from '../../firebase'
 import { collection, addDoc, onSnapshot, orderBy, query, serverTimestamp } from 'firebase/firestore'
 import Delete from './Delete'
+import Stickers from './Stickers'
 
 export default function Chat({ socket, user }) {
     const messageRef = useRef()
@@ -11,6 +12,7 @@ export default function Chat({ socket, user }) {
     const [uploading, setUploading] = useState(false)
     const [unread, setUnread] = useState(0)
     const [showScrollBtn, setShowScrollBtn] = useState(false)
+    const [showStickers, setShowStickers] = useState(false)
 
     useEffect(() => {
         const q = query(collection(db, 'messages'), orderBy('createdAt'))
@@ -158,6 +160,7 @@ export default function Chat({ socket, user }) {
                 <div ref={bottomRef} />
             </div>
 
+            {/* Botão de rolar para baixo */}
             {showScrollBtn && (
                 <button
                     onClick={scrollToBottom}
@@ -179,6 +182,16 @@ export default function Chat({ socket, user }) {
                 </button>
             )}
 
+            {/* Painel de figurinhas */}
+            {showStickers && (
+                <Stickers
+                    user={user}
+                    socket={socket}
+                    onClose={() => setShowStickers(false)}
+                />
+            )}
+
+            {/* Input de mensagem */}
             <div style={{
                 display: 'flex',
                 gap: '8px',
@@ -201,6 +214,10 @@ export default function Chat({ socket, user }) {
                 />
                 <button onClick={() => fileRef.current.click()} disabled={uploading}>
                     {uploading ? '...' : '📷'}
+                </button>
+                {/* Botão de figurinhas */}
+                <button onClick={() => setShowStickers(!showStickers)}>
+                    🎭
                 </button>
             </div>
         </div>

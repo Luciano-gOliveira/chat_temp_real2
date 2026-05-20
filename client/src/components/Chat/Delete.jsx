@@ -48,7 +48,7 @@ export default function Delete({ message, currentUser }) {
                         src={message.imageUrl}
                         alt="imagem"
                         style={{
-                            maxWidth: '400px',
+                            maxWidth: message.isSticker ? '140px' : '400px',
                             width: '100%',
                             borderRadius: '12px',
                             marginTop: '4px'
