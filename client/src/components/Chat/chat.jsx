@@ -4,6 +4,7 @@ import { collection, addDoc, onSnapshot, orderBy, query, serverTimestamp } from 
 import Delete from './Delete'
 import Stickers from './Stickers'
 import VoiceMessage from './VoiceMessage'
+import VideoCall from './VideoCall'
 
 export default function Chat({ socket, user }) {
     const messageRef = useRef()
@@ -222,6 +223,8 @@ export default function Chat({ socket, user }) {
                 </button>
                 {/* Botão de mensagem de voz */}
                 <VoiceMessage user={user} socket={socket} />
+                {/* Botão de videochamada */}
+                <VideoCall socket={socket} user={user} />
             </div>
         </div>
     )

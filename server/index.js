@@ -21,7 +21,6 @@ io.on('connection', (socket) => {
     socket.data.username = username
   })
 
-  // ✅ CORREÇÃO PRINCIPAL
   socket.on('send_message', (data) => {
     io.emit('receive_message', {
       ...data,
@@ -30,10 +29,32 @@ io.on('connection', (socket) => {
     })
   })
 
+  // ✅ Videochamada DENTRO do io.on('connection')
+  socket.on('join_call', () => {
+    const usersInCall = [...io.sockets.sockets.values()]
+      .filter(s => s.data.inCall)
+      .map(s => s.id)
+
+    socket.data.inCall = true
+    socket.join('video-call')
+    socket.emit('call_users', usersInCall)
+    socket.to('video-call').emit('user_joined_call', socket.id)
+  })
+
+  socket.on('call_signal', ({ to, signal }) => {
+    io.to(to).emit('call_signal', { from: socket.id, signal })
+  })
+
+  socket.on('leave_call', () => {
+    socket.data.inCall = false
+    socket.leave('video-call')
+    socket.to('video-call').emit('user_left_call', socket.id)
+  })
+
   socket.on('disconnect', () => {
     console.log('Cliente desconectado: ' + socket.id)
   })
- 
+
 })
 
 server.listen(PORT, () => {
