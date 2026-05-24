@@ -87,7 +87,7 @@ export default function Chat({ socket, user }) {
         await addDoc(collection(db, 'messages'), {
             text: message,
             authorUsername: user?.displayName ?? 'Anônimo',
-            authorId: socket.id,
+            authorId: user.uid,
             createdAt: serverTimestamp()
         })
         clearInput()
